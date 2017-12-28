@@ -173,9 +173,9 @@ void VDSession::update(unsigned int aClassIndex) {
 		mVDWebsocket->changeFloatValue(33, getFreq(2), true);
 		mVDWebsocket->changeFloatValue(34, getFreq(3), true);
 	}
-	/*mSelectedWarp = mVDRouter->selectedWarp();
-	setFboFragmentShaderIndex(0, mVDRouter->selectedFboA());
-	setFboFragmentShaderIndex(1, mVDRouter->selectedFboB());*/
+	//mSelectedWarp = mVDRouter->selectedWarp();
+	setWarpAFboIndex(0, mVDRouter->selectedFboA());
+	setWarpBFboIndex(0, mVDRouter->selectedFboB());
 }
 bool VDSession::save()
 {
@@ -598,10 +598,12 @@ void VDSession::setWarpBShaderIndex(unsigned int aWarpIndex, unsigned int aWarpS
 }
 void VDSession::setWarpAFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
 	mVDMix->setWarpAFboIndex(aWarpIndex, aWarpFboIndex);
+	mVDRouter->setWarpAFboIndex(aWarpIndex, aWarpFboIndex);
 	mVDWebsocket->changeWarpFboIndex(aWarpIndex, aWarpFboIndex, 0);
 }
 void VDSession::setWarpBFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
 	mVDMix->setWarpBFboIndex(aWarpIndex, aWarpFboIndex);
+	mVDRouter->setWarpBFboIndex(aWarpIndex, aWarpFboIndex);
 	mVDWebsocket->changeWarpFboIndex(aWarpIndex, aWarpFboIndex, 1);
 }
 void VDSession::updateWarpName(unsigned int aWarpIndex) {

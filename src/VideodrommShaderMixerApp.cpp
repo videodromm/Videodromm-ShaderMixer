@@ -38,12 +38,12 @@ void VideodrommShaderMixerApp::createControlWindow()
 
 	deleteControlWindows();
 	mVDSession->getWindowsResolution();
-	CI_LOG_V("createRenderWindow, resolution:" + toString(mVDSettings->mRenderWidth) + "x" + toString(mVDSettings->mRenderHeight));
+	CI_LOG_V("createRenderWindow, resolution:" + toString(mVDSettings->mMainWindowWidth) + "x" + toString(mVDSettings->mMainWindowHeight));
 
 	string windowName = "render";
 	// OK mControlWindow = createWindow(Window::Format().size(mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight));
-	mControlWindow = createWindow(Window::Format().size(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight));
-	mControlWindow->setPos(mVDSettings->mMainWindowX, mVDSettings->mMainWindowY);
+	mControlWindow = createWindow(Window::Format().size(mVDSettings->mMainWindowWidth - 300, mVDSettings->mMainWindowHeight - 30));
+	mControlWindow->setPos(mVDSettings->mMainWindowX, mVDSettings->mMainWindowY + 10);
 	//mControlWindow->setBorderless();
 	mControlWindow->getSignalDraw().connect(std::bind(&VideodrommShaderMixerApp::drawControlWindow, this));
 	mControlWindow->getSignalResize().connect(std::bind(&VideodrommShaderMixerApp::resizeWindow, this));
