@@ -6,11 +6,10 @@
          "linear" : false,
          "resolution" : 16,
          "warp" : {
-            "active" : true,
-            "afboindex" : 0,
+            "afboindex" : 3,
             "ashaderfilename" : "tex1",
             "ashaderindex" : 0,
-            "bfboindex" : 1,
+            "bfboindex" : 2,
             "brightness" : 1,
             "bshaderfilename" : "tex1",
             "bshaderindex" : 0,
@@ -36,7 +35,7 @@
                   "y" : 1
                }
             ],
-            "crossfade" : 1,
+            "crossfade" : 0.39370100000000002,
             "height" : 2,
             "method" : "bilinear",
             "mixfboindex" : 0,

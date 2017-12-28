@@ -57,22 +57,6 @@ void VDUIRender::Run(const char* title) {
 		{
 			setValue(ctrl, (float)iResolutionY);
 		}
-		// use triangles
-		if (mVDSession->isWarpTriangle()) {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.9f, 1.0f, 0.5f));
-		}
-		else {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.0f, 0.1f, 0.1f));
-		}
-		ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0.9f, 0.7f, 0.7f));
-		ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0.9f, 0.8f, 0.8f));
-
-		if (ui::Button("Triangles")) {
-			mVDSession->toggleWarpTriangle();
-		}
-		ui::PopStyleColor(3);
-		if (ui::IsItemHovered()) ui::SetTooltip("Use Triangle");
-
 		// iContour
 		ctrl = 26;
 		if (ui::Button("a##contour")) { toggleAuto(ctrl); }
@@ -97,63 +81,8 @@ void VDUIRender::Run(const char* title) {
 		if (ui::Button("Delete Window")) {
 			mVDSession->deleteWindow();
 		}
-		if (ui::Button("Create Warp")) {
-			mVDSession->createWarpMix();
-		}
-		ui::SameLine();
-		if (ui::Button("Create Triangle")) {
-			mVDSession->createTriangleMix();
-		}
-
-		// alpha blending
-		/*if (mVDSession->isEnabledAlphaBlending()) {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.9f, 1.0f, 0.5f));
-		}
-		else {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.0f, 0.1f, 0.1f));
-		}
-		ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0.9f, 0.7f, 0.7f));
-		ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0.9f, 0.8f, 0.8f));
-
-		if (ui::Button("Alpha Blending")) {
-			mVDSession->toggleEnabledAlphaBlending();
-		}
-		ui::PopStyleColor(3);
-		if (ui::IsItemHovered()) ui::SetTooltip("Enabled Alpha Blending");
-		ui::SameLine();
-		// Render Texture
-		if (mVDSession->isRenderTexture()) {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.9f, 1.0f, 0.5f));
-		}
-		else {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.0f, 0.1f, 0.1f));
-		}
-		ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0.9f, 0.7f, 0.7f));
-		ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0.9f, 0.8f, 0.8f));
-
-		if (ui::Button("Render Texture")) {
-			mVDSession->toggleRenderTexture();
-		}
-		ui::PopStyleColor(3);
-		if (ui::IsItemHovered()) ui::SetTooltip("Render Texture or Mix");*/
-		// Activate animation
-		if (mVDSession->isWarpAnimationActive()) {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.9f, 1.0f, 0.5f));
-		}
-		else {
-			ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0.0f, 0.1f, 0.1f));
-		}
-		ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0.9f, 0.7f, 0.7f));
-		ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0.9f, 0.8f, 0.8f));
-
-		if (ui::Button("Warp Animation")) {
-			mVDSession->toggleWarpAnimationActive();
-		}
-		ui::PopStyleColor(3);
-		if (ui::IsItemHovered()) ui::SetTooltip("Activate Warp Animation");
-
+		
 		ui::Text("fp %dx%d f %dx%d r %dx%d", mVDSettings->mPreviewFboWidth, mVDSettings->mPreviewFboHeight, mVDSettings->mFboWidth, mVDSettings->mFboHeight, mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
-		ui::Text("solo %d", mVDSession->getSolo());
 		// feedback
 		static int fb = mVDSession->getFeedbackFrames();
 		if (ui::SliderInt("feedback", &fb, 0, 9))

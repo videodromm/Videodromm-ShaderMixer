@@ -184,8 +184,14 @@ void VideodrommShaderMixerApp::drawRenderWindow()
 	}
 	}*/
 	gl::clear(Color::black());
-	gl::setMatricesWindow(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight, false);
-	gl::draw(mVDSession->getRenderTexture(), getWindowBounds());
+	gl::setMatricesWindow(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);// , false);
+	// 20171228 gl::draw(mVDSession->getRenderTexture(), getWindowBounds());
+	gl::draw(mVDSession->getRenderTexture(), Area(0, 0, mVDSettings->mRenderWidth / 2, mVDSettings->mRenderHeight / 2));
+	gl::draw(mVDSession->getMixTexture(0), Area(mVDSettings->mRenderWidth / 2, mVDSettings->mRenderHeight / 2, mVDSettings->mRenderWidth, mVDSettings->mRenderHeight));
+	gl::draw(mVDSession->getFboRenderedTexture(0), Area(0, 0, 320, 200));
+	gl::draw(mVDSession->getFboRenderedTexture(1), Area(320, 0, 640, 200));
+	gl::draw(mVDSession->getFboTexture(0), Area(640, 0, 960, 200));
+	gl::draw(mVDSession->getFboTexture(1), Area(960, 0, 1280, 200));
 }
 
 void VideodrommShaderMixerApp::drawControlWindow()
@@ -193,7 +199,7 @@ void VideodrommShaderMixerApp::drawControlWindow()
 	gl::clear(Color::black());
 	//gl::color(Color::white());
 	gl::setMatricesWindow(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight, false);
-	gl::draw(mVDSession->getMixTexture(mVDSession->getCurrentEditIndex()), Rectf(10 + mVDSettings->uiLargeW, 170, 650 + mVDSettings->uiLargeW, 650));
+	gl::draw(mVDSession->getMixTexture(0), Rectf(10 + mVDSettings->uiLargeW, 170, 650 + mVDSettings->uiLargeW, 650));
 	//gl::draw(mVDSession->getMixTexture(), Rectf(0, 170, 350 , 350));
 	if (mVDSettings->mCursorVisible) {
 		// imgui

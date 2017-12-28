@@ -158,21 +158,6 @@ void VDConsole::ExecCommand(const char* command_line)
 	{
 		mVDSettings->iDebug = !mVDSettings->iDebug;
 	}
-	else if (Stricmp(command_line, "WARPCREATE") == 0)
-	{
-		mVDSession->createWarpMix();
-	}
-	else if (Strnicmp(command_line, "WARPF", 5) == 0)
-	{
-		// for instance WARPF 0 4
-		if (strlen(command_line) > 8)
-		{
-			//int index = command_line[6];
-			//int fbo = command_line[8];
-
-			//mVDMix->assignFboToWarp(index - 48, fbo - 48);
-		}
-	}
 	else if (Stricmp(command_line, "LOADSTOP") == 0)
 	{
 		//mVDMix->stopLoading();

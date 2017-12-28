@@ -33,10 +33,6 @@
 #include "VDUIMouse.h"
 // Shaders
 #include "VDUIShaders.h"
-// Warps
-#include "VDUIWarps.h"
-// Triangles
-#include "VDUITriangles.h"
 // Render
 #include "VDUIRender.h"
 
@@ -102,12 +98,6 @@ namespace VideoDromm
 		// UIShaders
 		VDUIShadersRef				mUIShaders;
 		bool						showUIShaders;
-		// UIWarps
-		VDUIWarpsRef				mUIWarps;
-		bool						showUIWarps;
-		// UITriangles
-		VDUITrianglesRef			mUITriangles;
-		bool						showUITriangles;
 		// UIRender
 		VDUIRenderRef				mUIRender;
 		bool						showUIRender;

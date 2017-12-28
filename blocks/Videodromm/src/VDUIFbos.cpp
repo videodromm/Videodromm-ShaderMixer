@@ -79,40 +79,33 @@ void VDUIFbos::Run(const char* title) {
 			// loop on the fbos
 			for (unsigned int a = 0; a < mVDSession->getFboListSize(); a++) {
 				if (a > 0 && (a % 6 != 0)) ui::SameLine();
-				if (mVDSession->getWarpAFboIndex(m) == a) {
+				if (mVDSession->getFboAIndex(m) == a) {
 					ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(a / 7.0f, 1.0f, 1.0f));
 				}
 				else {
 					ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(a / 7.0f, 0.1f, 0.1f));
 				}
-				//ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(a / 7.0f, 0.7f, 0.7f));
-				//ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(a / 7.0f, 0.8f, 0.8f));
 
 				sprintf(buf, "%d##wia%d%d", a, m, a);
-				if (ui::Button(buf)) mVDSession->setWarpAFboIndex(m, a);
+				if (ui::Button(buf)) mVDSession->setFboAIndex(m, a);
 				sprintf(buf, "Set input fbo A to %s", mVDSession->getShaderName(a).c_str());
 				if (ui::IsItemHovered()) ui::SetTooltip(buf);
 				ui::PopStyleColor(1);
-				//::PopStyleColor(3);
 			}
 			// loop on the fbos
 			for (unsigned int b = 0; b < mVDSession->getFboListSize(); b++) {
 				if (b > 0 && (b % 6 != 0)) ui::SameLine();
-				if (mVDSession->getWarpBFboIndex(m) == b) {
+				if (mVDSession->getFboBIndex(m) == b) {
 					ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(b / 7.0f, 1.0f, 1.0f));
 				}
 				else {
 					ui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(b / 7.0f, 0.1f, 0.1f));
 				}
-				//ui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(b / 7.0f, 0.7f, 0.7f));
-				//ui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(b / 7.0f, 0.8f, 0.8f));
-
 				sprintf(buf, "%d##wib%d%d", b, m, b);
-				if (ui::Button(buf)) mVDSession->setWarpBFboIndex(m, b);
+				if (ui::Button(buf)) mVDSession->setFboBIndex(m, b);
 				sprintf(buf, "Set input fbo B to %s", mVDSession->getShaderName(b).c_str());
 				if (ui::IsItemHovered()) ui::SetTooltip(buf);
 				ui::PopStyleColor(1);
-				//ui::PopStyleColor(3);
 			}
 			ui::Text("mixwh %dx%d", mVDSession->getMixTexture(m)->getWidth(), mVDSession->getMixTexture(m)->getHeight());
 			

@@ -131,6 +131,10 @@ namespace VideoDromm {
 		void							toggleFreqWSSend() { mFreqWSSend = !mFreqWSSend; };
 		// uniforms
 		//void							setCrossfade(float aCrossfade); // TODO use setControlValue
+		void							setFboAIndex(unsigned int aIndex, unsigned int aFboIndex);
+		void							setFboBIndex(unsigned int aIndex, unsigned int aFboIndex);
+		unsigned int					getFboAIndex(unsigned int aIndex) { return mVDMix->getFboAIndex(aIndex); };
+		unsigned int					getFboBIndex(unsigned int aIndex) { return mVDMix->getFboBIndex(aIndex); };
 
 		void							setFboFragmentShaderIndex(unsigned int aFboIndex, unsigned int aFboShaderIndex) { mVDMix->setFboFragmentShaderIndex(aFboIndex, aFboShaderIndex); };
 		unsigned int					getFboFragmentShaderIndex(unsigned int aFboIndex) { return mVDMix->getFboFragmentShaderIndex(aFboIndex); };
@@ -152,57 +156,7 @@ namespace VideoDromm {
 		// file operations (filedrop, etc)
 		//int								loadFileFromAbsolutePath(string aAbsolutePath, int aIndex = 0);
 		void							fileDrop(FileDropEvent event);
-		// warps
-		string							getWarpName(unsigned int aWarpIndex) { return mVDMix->getWarpName(aWarpIndex); };
-		unsigned int					getWarpAFboIndex(unsigned int aWarpIndex) { return mVDMix->getWarpAFboIndex(aWarpIndex); };
-		unsigned int					getWarpBFboIndex(unsigned int aWarpIndex) { return mVDMix->getWarpBFboIndex(aWarpIndex); };
-		unsigned int					getWarpAShaderIndex(unsigned int aWarpIndex);
-		unsigned int					getWarpBShaderIndex(unsigned int aWarpIndex);
-		unsigned int					getWarpCount() { return mVDMix->getWarpCount(); };
 
-		void							createWarpMix() { mVDMix->createWarp(); };
-		void							setWarpAFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex);
-		void							setWarpBFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex);
-		void							setWarpAShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex);
-		void							setWarpBShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex);
-		void							setWarpCrossfade(unsigned int aWarpIndex, float aCrossfade) { mVDMix->setWarpCrossfade(aWarpIndex, aCrossfade); };
-		float							getWarpCrossfade(unsigned int aWarpIndex) { return mVDMix->getWarpCrossfade(aWarpIndex); };
-		bool							isWarpActive(unsigned int aWarpIndex) { return mVDMix->isWarpActive(aWarpIndex); };
-		void							toggleWarpActive(unsigned int aWarpIndex) { mVDMix->toggleWarpActive(aWarpIndex); };
-		bool							isWarpSolo(unsigned int aWarpIndex) { return mVDMix->isWarpSolo(aWarpIndex); };
-		void							toggleWarpSolo(unsigned int aWarpIndex) { mVDMix->toggleWarpSolo(aWarpIndex); };
-		bool							isWarpDeleted(unsigned int aWarpIndex) { return mVDMix->isWarpDeleted(aWarpIndex); };
-		void							toggleDeleteWarp(unsigned int aWarpIndex) { mVDMix->toggleDeleteWarp(aWarpIndex); };
-		bool							isWarpAnimationActive() { return mVDMix->isWarpAnimationActive(); };
-		void							toggleWarpAnimationActive() { mVDMix->toggleWarpAnimationActive(); };
-		// common to warps and triangles
-		bool							isWarpTriangle();
-		void							toggleWarpTriangle();
-		int								getSolo() { return mVDMix->getSolo(); };
-		unsigned int					getSoloOrActiveIndex() { return mVDMix->getSoloOrActiveIndex(); };
-		void							setCurrentEditIndex(unsigned int aIndex) { mVDMix->setCurrentEditIndex(aIndex); };
-		unsigned int					getCurrentEditIndex() { return mVDMix->getCurrentEditIndex(); };
-		// triangles
-		string							getTriangleName(unsigned int aTriangleIndex) { return mVDMix->getTriangleName(aTriangleIndex); };
-		unsigned int					getTriangleCount() { return mVDMix->getTriangleCount(); };
-		unsigned int					getTriangleAFboIndex(unsigned int aWarpIndex) { return mVDMix->getTriangleAFboIndex(aWarpIndex); };
-		unsigned int					getTriangleBFboIndex(unsigned int aWarpIndex) { return mVDMix->getTriangleBFboIndex(aWarpIndex); };
-		void							setTriangleAFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex);
-		void							setTriangleBFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex);
-		bool							isTriangleActive(unsigned int aTriangleIndex) { return mVDMix->isTriangleActive(aTriangleIndex); };
-		void							toggleTriangleActive(unsigned int aTriangleIndex) { mVDMix->toggleTriangleActive(aTriangleIndex); };
-		bool							isTriangleSolo(unsigned int aTriangleIndex) { return mVDMix->isTriangleSolo(aTriangleIndex); };
-		void							toggleTriangleSolo(unsigned int aTriangleIndex) { mVDMix->toggleTriangleSolo(aTriangleIndex); };
-		bool							isTriangleDeleted(unsigned int aTriangleIndex) { return mVDMix->isTriangleDeleted(aTriangleIndex); };
-		void							toggleDeleteTriangle(unsigned int aTriangleIndex) { mVDMix->toggleDeleteTriangle(aTriangleIndex); };
-		void							setTriangleCrossfade(unsigned int aTriangleIndex, float aCrossfade) { mVDMix->setTriangleCrossfade(aTriangleIndex, aCrossfade); };
-		float							getTriangleCrossfade(unsigned int aTriangleIndex) { return mVDMix->getTriangleCrossfade(aTriangleIndex); };
-		ci::gl::TextureRef				getTriangleTexture(unsigned int aTriangleFboIndex) { return mVDMix->getTriangleTexture(aTriangleFboIndex); }
-		void							createTriangleMix() { mVDMix->createTriangle(); };
-		int								getTrianglePointX(unsigned int aTriangleIndex, unsigned int aPointIndex) { return mVDMix->getTrianglePointX(aTriangleIndex, aPointIndex); };
-		int								getTrianglePointY(unsigned int aTriangleIndex, unsigned int aPointIndex) { return mVDMix->getTrianglePointY(aTriangleIndex, aPointIndex); };
-		void							setTrianglePointX(unsigned int aTriangleIndex, unsigned int aPointIndex, unsigned int aValue) { mVDMix->setTrianglePointX(aTriangleIndex, aPointIndex, aValue); };
-		void							setTrianglePointY(unsigned int aTriangleIndex, unsigned int aPointIndex, unsigned int aValue) { mVDMix->setTrianglePointY(aTriangleIndex, aPointIndex, aValue); };
 		// fbos
 		void							fboFlipV(unsigned int aFboIndex) { mVDMix->fboFlipV(aFboIndex); };
 		bool							isFboFlipV(unsigned int aFboIndex) { return mVDMix->isFboFlipV(aFboIndex); };
@@ -369,7 +323,6 @@ namespace VideoDromm {
 		float							mPosX;
 		float							mPosY;
 		float							mZoom;
-		void							updateWarpName(unsigned int aWarpIndex);
 		void							updateStream(string * aStringPtr) { mVDMix->updateStream(aStringPtr); };
 		//! window management
 		int								cmd;

@@ -9,16 +9,5 @@
       "endframe" : 20000000,
       "fadeindelay" : 5,
       "fadeoutdelay" : 1
-   },
-   "warp0" : {
-      "afboindex" : 0,
-      "ashaderindex" : 0,
-      "bfboindex" : 1,
-      "bshaderindex" : 0,
-      "name" : "",
-      "xfade" : 1
-   },
-   "warps" : {
-      "size" : 1
    }
 }

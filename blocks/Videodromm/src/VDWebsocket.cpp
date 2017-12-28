@@ -130,7 +130,7 @@ void VDWebsocket::parseMessage(string msg) {
 						//string evt = json.getChild("event").getValue<string>();
 					}
 				}
-				if (json.hasChild("cmd")) {
+				/*if (json.hasChild("cmd")) {
 					JsonTree jsonCmd = json.getChild("cmd");
 					for (JsonTree::ConstIter jsonElement = jsonCmd.begin(); jsonElement != jsonCmd.end(); ++jsonElement) {
 						receivedType = jsonElement->getChild("type").getValue<int>();
@@ -166,7 +166,7 @@ void VDWebsocket::parseMessage(string msg) {
 
 					}
 
-				}
+				} */
 			}
 			catch (cinder::JsonTree::Exception exception) {
 				mVDSettings->mWebSocketsMsg += " error jsonparser exception: ";

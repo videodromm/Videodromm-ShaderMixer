@@ -54,16 +54,7 @@ VDSession::VDSession(VDSettingsRef aVDSettings)
 		oStream.close();
 		save();
 	}
-	// check if something went wrong, if so, create a default warp
-	if (mVDMix->getWarpCount() == 0) {
-		// init for received shaders from websockets for warp 0
-		mVDMix->createWarp("default", 1, 1, 2, 2, 1.0f);
-	}
-	// check if something went wrong, if so, create a default warp
-	if (mVDMix->getTriangleCount() == 0) {
-		// init for received shaders from websockets for warp 0
-		mVDMix->createTriangle("default", 1, 1, 2, 2, 1.0f);
-	}
+
 	cmd = -1;
 	mFreqWSSend = false;
 	mEnabledAlphaBlending = true;
@@ -138,13 +129,11 @@ void VDSession::update(unsigned int aClassIndex) {
 			updateStream(mVDWebsocket->getBase64Image());
 		}
 		if (mVDWebsocket->hasReceivedShader()) {
-			if (mVDMix->getWarpCrossfade(0) < 0.5) {
+			if (mVDSettings->xFade < 0.5) {
 				setFragmentShaderString(2, mVDWebsocket->getReceivedShader());
-				mVDMix->crossfadeWarp(0, 1.0f);
 			}
 			else {
 				setFragmentShaderString(1, mVDWebsocket->getReceivedShader());
-				mVDMix->crossfadeWarp(0, 0.0f);
 			}
 		}
 		if (mVDSettings->iGreyScale)
@@ -173,9 +162,6 @@ void VDSession::update(unsigned int aClassIndex) {
 		mVDWebsocket->changeFloatValue(33, getFreq(2), true);
 		mVDWebsocket->changeFloatValue(34, getFreq(3), true);
 	}
-	//mSelectedWarp = mVDRouter->selectedWarp();
-	setWarpAFboIndex(0, mVDRouter->selectedFboA());
-	setWarpBFboIndex(0, mVDRouter->selectedFboB());
 }
 bool VDSession::save()
 {
@@ -206,20 +192,6 @@ bool VDSession::save()
 		assets.addChild(ci::JsonTree("textplaybackend", mTextPlaybackEnd));
 	}
 	doc.pushBack(assets);
-	// warps
-	JsonTree warps = JsonTree::makeArray("warps");
-	warps.addChild(ci::JsonTree("size", mVDMix->getWarpCount()));
-	doc.pushBack(warps);
-	for (unsigned int w = 0; w < mVDMix->getWarpCount(); w++) {
-		JsonTree jsonWarp = JsonTree::makeArray("warp" + toString(w));
-		jsonWarp.addChild(ci::JsonTree("name", mVDMix->getWarpName(w)));
-		jsonWarp.addChild(ci::JsonTree("afboindex", mVDMix->getWarpAFboIndex(w)));
-		jsonWarp.addChild(ci::JsonTree("bfboindex", mVDMix->getWarpBFboIndex(w)));
-		jsonWarp.addChild(ci::JsonTree("ashaderindex", mVDMix->getWarpAShaderIndex(w)));
-		jsonWarp.addChild(ci::JsonTree("bshaderindex", mVDMix->getWarpBShaderIndex(w)));
-		jsonWarp.addChild(ci::JsonTree("xfade", mVDMix->getWarpCrossfade(w)));
-		doc.pushBack(jsonWarp);
-	}
 
 	doc.write(writeFile(sessionPath), JsonTree::WriteOptions());
 
@@ -261,23 +233,6 @@ void VDSession::restore()
 			if (assets.hasChild("textplaybackend")) mTextPlaybackEnd = assets.getValueForKey<int>("textplaybackend");
 		}
 
-		// warps TODO in warp.cpp
-		/*	if (doc.hasChild("warps")) {
-				unsigned int warpsize = 0;
-				JsonTree warps(doc.getChild("warps"));
-				if (warps.hasChild("size")) warpsize = warps.getValueForKey<int>("size");
-				for (unsigned int w = 0; w < warpsize; w++) {
-				JsonTree jsonWarp(doc.getChild("warp" + toString(w)));
-				string wName = (jsonWarp.hasChild("name")) ? jsonWarp.getValueForKey<string>("name") : "no name";
-				unsigned int afboindex = (jsonWarp.hasChild("afboindex")) ? jsonWarp.getValueForKey<int>("afboindex") : 1;
-				unsigned int bfboindex = (jsonWarp.hasChild("bfboindex")) ? jsonWarp.getValueForKey<int>("bfboindex") : 1;
-				unsigned int aShaderIndex = (jsonWarp.hasChild("ashaderindex")) ? jsonWarp.getValueForKey<int>("ashaderindex") : 1;
-				unsigned int bShaderIndex = (jsonWarp.hasChild("bshaderindex")) ? jsonWarp.getValueForKey<int>("bshaderindex") : 1;
-				float xfade = (jsonWarp.hasChild("xfade")) ? jsonWarp.getValueForKey<float>("xfade") : 1.0f;
-				mVDMix->createWarp(wName, afboindex, aShaderIndex, bfboindex, bShaderIndex, xfade);
-				}
-
-				}*/
 	}
 	catch (const JsonTree::ExcJsonParserError& exc) {
 		CI_LOG_W(exc.what());
@@ -422,14 +377,7 @@ bool VDSession::handleKeyDown(KeyEvent &event)
 		// pass this event to Mix handler
 		if (!mVDAnimation->handleKeyDown(event)) {
 			switch (event.getCode()) {
-			case KeyEvent::KEY_w:
-				// toggle warp edit mode
-				Warp::enableEditMode(!Warp::isEditModeEnabled());
-				break;
-			case KeyEvent::KEY_n:
-				createWarpMix();
-				// TODO? Warp::handleResize(mWarps);
-				break;
+			
 			case KeyEvent::KEY_SPACE:
 				//mVDTextures->playMovie();
 				//mVDAnimation->currentScene++;
@@ -572,56 +520,6 @@ bool VDSession::handleKeyUp(KeyEvent &event) {
 	return event.isHandled();
 }
 #pragma endregion events
-
-#pragma region warps
-
-unsigned int VDSession::getWarpAShaderIndex(unsigned int aWarpIndex) {
-	return mVDMix->getWarpAShaderIndex(aWarpIndex);
-}
-unsigned int VDSession::getWarpBShaderIndex(unsigned int aWarpIndex) {
-	return mVDMix->getWarpBShaderIndex(aWarpIndex);
-}
-
-bool VDSession::isWarpTriangle() {
-	return mVDMix->isWarpTriangle();
-}
-void VDSession::toggleWarpTriangle() {
-	mVDMix->toggleWarpTriangle();
-}
-void VDSession::setWarpAShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex) {
-	mVDMix->setWarpAShaderIndex(aWarpIndex, aWarpShaderIndex);
-	mVDWebsocket->changeShaderIndex(aWarpIndex, aWarpShaderIndex, 0);
-}
-void VDSession::setWarpBShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex) {
-	mVDMix->setWarpBShaderIndex(aWarpIndex, aWarpShaderIndex);
-	mVDWebsocket->changeShaderIndex(aWarpIndex, aWarpShaderIndex, 1);
-}
-void VDSession::setWarpAFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
-	mVDMix->setWarpAFboIndex(aWarpIndex, aWarpFboIndex);
-	mVDRouter->setWarpAFboIndex(aWarpIndex, aWarpFboIndex);
-	mVDWebsocket->changeWarpFboIndex(aWarpIndex, aWarpFboIndex, 0);
-}
-void VDSession::setWarpBFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
-	mVDMix->setWarpBFboIndex(aWarpIndex, aWarpFboIndex);
-	mVDRouter->setWarpBFboIndex(aWarpIndex, aWarpFboIndex);
-	mVDWebsocket->changeWarpFboIndex(aWarpIndex, aWarpFboIndex, 1);
-}
-void VDSession::updateWarpName(unsigned int aWarpIndex) {
-	mVDMix->updateWarpName(aWarpIndex);
-}
-#pragma endregion warps
-// triangles
-#pragma region triangles
-void VDSession::setTriangleAFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex) {
-	mVDMix->setTriangleAFboIndex(aTriangleIndex, aTriangleFboIndex);
-	// TODO mVDWebsocket->changeTriangleFboIndex(aTriangleIndex, aTriangleFboIndex, 0);
-}
-void VDSession::setTriangleBFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex) {
-	mVDMix->setTriangleBFboIndex(aTriangleIndex, aTriangleFboIndex);
-	// TODO mVDWebsocket->changeTriangleFboIndex(aTriangleIndex, aTriangleFboIndex, 1);
-}
-
-#pragma endregion triangles
 // fbos
 #pragma region fbos
 bool VDSession::isFlipH() {
@@ -659,7 +557,16 @@ void VDSession::sendFragmentShader(unsigned int aShaderIndex) {
 unsigned int VDSession::getMixFbosCount() {
 	return mVDMix->getMixFbosCount();
 };
-
+void VDSession::setFboAIndex(unsigned int aIndex, unsigned int aFboIndex) {
+	/*mVDMix->setWarpAFboIndex(aIndex, aFboIndex);
+	mVDRouter->setWarpAFboIndex(aIndex, aFboIndex);
+	mVDWebsocket->changeWarpFboIndex(aIndex, aFboIndex, 0);*/
+}
+void VDSession::setFboBIndex(unsigned int aIndex, unsigned int aFboIndex) {
+	/*mVDMix->setWarpBFboIndex(aIndex, aFboIndex);
+	mVDRouter->setWarpBFboIndex(aIndex, aFboIndex);
+	mVDWebsocket->changeWarpFboIndex(aIndex, aFboIndex, 1);*/
+}
 #pragma endregion fbos
 // shaders
 #pragma region shaders

@@ -57,15 +57,6 @@
     <Filter Include="Blocks\Videodromm\src">
       <UniqueIdentifier>{335DAFB1-8603-4007-9835-4EE6E4D997BB}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Blocks\Cinder-Warping">
-      <UniqueIdentifier>{BC8883C5-1844-4116-86F6-2A413A42E39A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Blocks\Cinder-Warping\include">
-      <UniqueIdentifier>{3EE67FDD-9384-4CF4-ABF4-3F65182F35FF}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Blocks\Cinder-Warping\src">
-      <UniqueIdentifier>{A2868BD8-5239-475E-AEBE-97E5E8BB3A52}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Blocks\Cinder-WebSocketPP">
       <UniqueIdentifier>{C1A58279-5F9A-4465-9AE3-CF049A322A15}</UniqueIdentifier>
     </Filter>
@@ -200,9 +191,6 @@
     <ClInclude Include="..\blocks\Videodromm\include\VDTexture.h">
       <Filter>Blocks\Videodromm\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\blocks\Videodromm\include\VDTriangle.h">
-      <Filter>Blocks\Videodromm\include</Filter>
-    </ClInclude>
     <ClInclude Include="..\blocks\Videodromm\include\VDUI.h">
       <Filter>Blocks\Videodromm\include</Filter>
     </ClInclude>
@@ -240,12 +228,6 @@
       <Filter>Blocks\Videodromm\include</Filter>
     </ClInclude>
     <ClInclude Include="..\blocks\Videodromm\include\VDUITextures.h">
-      <Filter>Blocks\Videodromm\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\blocks\Videodromm\include\VDUITriangles.h">
-      <Filter>Blocks\Videodromm\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\blocks\Videodromm\include\VDUIWarps.h">
       <Filter>Blocks\Videodromm\include</Filter>
     </ClInclude>
     <ClInclude Include="..\blocks\Videodromm\include\VDUIWebsockets.h">
@@ -293,9 +275,6 @@
     <ClCompile Include="..\blocks\Videodromm\src\VDTexture.cpp">
       <Filter>Blocks\Videodromm\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\blocks\Videodromm\src\VDTriangle.cpp">
-      <Filter>Blocks\Videodromm\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\blocks\Videodromm\src\VDUI.cpp">
       <Filter>Blocks\Videodromm\src</Filter>
     </ClCompile>
@@ -335,12 +314,6 @@
     <ClCompile Include="..\blocks\Videodromm\src\VDUITextures.cpp">
       <Filter>Blocks\Videodromm\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\blocks\Videodromm\src\VDUITriangles.cpp">
-      <Filter>Blocks\Videodromm\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\blocks\Videodromm\src\VDUIWarps.cpp">
-      <Filter>Blocks\Videodromm\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\blocks\Videodromm\src\VDUIWebsockets.cpp">
       <Filter>Blocks\Videodromm\src</Filter>
     </ClCompile>
@@ -349,21 +322,6 @@
     </ClCompile>
     <ClCompile Include="..\blocks\Videodromm\src\VDWebsocket.cpp">
       <Filter>Blocks\Videodromm\src</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\..\Cinder\blocks\Cinder-Warping\include\Warp.h">
-      <Filter>Blocks\Cinder-Warping\include</Filter>
-    </ClInclude>
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\Warp.cpp">
-      <Filter>Blocks\Cinder-Warping\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpBilinear.cpp">
-      <Filter>Blocks\Cinder-Warping\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpPerspective.cpp">
-      <Filter>Blocks\Cinder-Warping\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpPerspectiveBilinear.cpp">
-      <Filter>Blocks\Cinder-Warping\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketClient.cpp">
       <Filter>Blocks\Cinder-WebSocketPP\src</Filter>

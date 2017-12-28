@@ -236,7 +236,6 @@
     <ClInclude Include="..\blocks\Videodromm\include\VDSettings.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDShader.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDTexture.h" />
-    <ClInclude Include="..\blocks\Videodromm\include\VDTriangle.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUI.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUIAnimation.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUIAudio.h" />
@@ -250,13 +249,10 @@
     <ClInclude Include="..\blocks\Videodromm\include\VDUIShaders.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUITempo.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUITextures.h" />
-    <ClInclude Include="..\blocks\Videodromm\include\VDUITriangles.h" />
-    <ClInclude Include="..\blocks\Videodromm\include\VDUIWarps.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUIWebsockets.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDUtils.h" />
     <ClInclude Include="..\blocks\Videodromm\include\VDWebsocket.h" />
     <ClInclude Include="..\blocks\Videodromm\include\Watchdog.h" />
-    <ClInclude Include="..\..\..\Cinder\blocks\Cinder-Warping\include\Warp.h" />
     <ClInclude Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketClient.h" />
     <ClInclude Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketConnection.h" />
     <ClInclude Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketServer.h" />
@@ -286,7 +282,6 @@
     <ClCompile Include="..\blocks\Videodromm\src\VDSettings.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDShader.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDTexture.cpp" />
-    <ClCompile Include="..\blocks\Videodromm\src\VDTriangle.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUI.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUIAnimation.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUIAudio.cpp" />
@@ -300,15 +295,9 @@
     <ClCompile Include="..\blocks\Videodromm\src\VDUIShaders.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUITempo.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUITextures.cpp" />
-    <ClCompile Include="..\blocks\Videodromm\src\VDUITriangles.cpp" />
-    <ClCompile Include="..\blocks\Videodromm\src\VDUIWarps.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUIWebsockets.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDUtils.cpp" />
     <ClCompile Include="..\blocks\Videodromm\src\VDWebsocket.cpp" />
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\Warp.cpp" />
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpBilinear.cpp" />
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpPerspective.cpp" />
-    <ClCompile Include="..\..\..\Cinder\blocks\Cinder-Warping\src\WarpPerspectiveBilinear.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketClient.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketConnection.cpp" />
     <ClCompile Include="..\..\..\Cinder\blocks\Cinder-WebSocketPP\src\WebSocketServer.cpp" />

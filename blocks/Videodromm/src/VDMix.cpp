@@ -32,11 +32,7 @@ namespace VideoDromm {
 			}*/
 			// render fbo
 		mRenderFbo = gl::Fbo::create(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight, fboFmt);
-		// mix fbo to render
-		warpMixToRender = 0;
-		//mWarpSettings = getAssetPath("") / mVDSettings->mAssetsPath / "warps.xml";
-		mWarpJson = getAssetPath("") / mVDSettings->mAssetsPath / "warps.json";
-
+	
 		mCurrentBlend = 0;
 		for (size_t i = 0; i < mVDAnimation->getBlendModesCount(); i++)
 		{
@@ -63,13 +59,6 @@ namespace VideoDromm {
 		mSharedFboIndex = 0;
 		mSpoutInitialized = false;
 		strcpy(mSenderName, "Videodromm Spout Sender"); // we have to set a sender name first
-		// triangles
-		mTrianglesJson = getAssetPath("") / mVDSettings->mAssetsPath / "triangles.json";
-		mUseTriangles = false;
-		mWarpAnimationActive = false;
-		mWarpActiveIndex = 0;
-		mSolo = -1;
-		triangleMixToRender = 0;
 	}
 
 #pragma region blendmodes
@@ -121,8 +110,6 @@ namespace VideoDromm {
 			mSpoutInitialized = mSpoutSender.CreateSender(mSenderName, mVDSettings->mFboWidth, mVDSettings->mFboHeight);
 		}
 #endif
-
-
 	}
 
 	ci::gl::TextureRef VDMix::getFboTexture(unsigned int aFboIndex) {
@@ -140,262 +127,25 @@ namespace VideoDromm {
 		gl::ScopedFramebuffer scopedFbo(mBlendFbos[mCurrentBlend]);
 		gl::clear(Color::black());
 		// texture binding must be before ScopedGlslProg
-		mFboList[mWarps[warpMixToRender]->getAFboIndex()]->getRenderedTexture()->bind(0);
-		mFboList[mWarps[warpMixToRender]->getBFboIndex()]->getRenderedTexture()->bind(1);
+		mFboList[0]->getRenderedTexture()->bind(0);
+		mFboList[1]->getRenderedTexture()->bind(1);
 		gl::ScopedGlslProg glslScope(mGlslBlend);
 		gl::drawSolidRect(Rectf(0, 0, mBlendFbos[mCurrentBlend]->getWidth(), mBlendFbos[mCurrentBlend]->getHeight()));
 	}
 #pragma endregion blendmodes
 
-#pragma region triangles
-	void VDMix::createTriangle(string wName, unsigned int aFboIndex, unsigned int aShaderIndex, unsigned int bFboIndex, unsigned int bShaderIndex, float xFade) {
-		int newIndex = mTriangleFbos.size();
-		// ensure bounds are valid
-		aFboIndex = math<int>::min(aFboIndex, getFboListSize() - 1);
-		bFboIndex = math<int>::min(bFboIndex, getFboListSize() - 1);
-		aShaderIndex = math<int>::min(aShaderIndex, getShadersCount() - 1);
-		bShaderIndex = math<int>::min(bShaderIndex, getShadersCount() - 1);
-		mTriangleFbos[newIndex].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
-		mTriangleFbos[newIndex].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-		mTriangleFbos[newIndex].name = wName;
-
-		mVDTriangles.push_back(VDTriangle::create());
-
-		//int i = mTriangles.size() - 1; // must have at least 1 triangle!
-		mVDTriangles[newIndex]->ABCrossfade = xFade;
-		mVDTriangles[newIndex]->setAFboIndex(aFboIndex);
-		mVDTriangles[newIndex]->setAShaderIndex(aShaderIndex);
-		mVDTriangles[newIndex]->setAShaderFilename(mShaderList[aShaderIndex]->getName());
-		mVDTriangles[newIndex]->setBFboIndex(bFboIndex);
-		mVDTriangles[newIndex]->setBShaderIndex(bShaderIndex);
-		mVDTriangles[newIndex]->setBShaderFilename(mShaderList[bShaderIndex]->getName());
-		mVDTriangles[newIndex]->setMixFboIndex(newIndex);
-		mVDTriangles[newIndex]->setName(toString(mVDTriangles[newIndex]->getMixFboIndex()) + wName);
-		if (newIndex > 0) {
-			mVDTriangles[newIndex]->setControlPoint(0, vec2(randInt(0, 1000)));
-			mVDTriangles[newIndex]->setControlPoint(1, vec2(randInt(418, 1080)));
-			mVDTriangles[newIndex]->setControlPoint(2, vec2(randInt(200, 1350)));
-		}
-		updateTriangleName(newIndex);
-	}
-	void VDMix::renderTriangles() {
-		gl::ScopedFramebuffer scopedFbo(mTriangleFbos[triangleMixToRender].fbo);
-		gl::clear(Color::black());
-		// render A and B fbos 
-		mFboList[mVDTriangles[triangleMixToRender]->getAFboIndex()]->getFboTexture();
-		mFboList[mVDTriangles[triangleMixToRender]->getBFboIndex()]->getFboTexture();
-		// texture binding must be before ScopedGlslProg
-		mFboList[mVDTriangles[triangleMixToRender]->getAFboIndex()]->getRenderedTexture()->bind(0);
-		mFboList[mVDTriangles[triangleMixToRender]->getBFboIndex()]->getRenderedTexture()->bind(1);
-		gl::ScopedGlslProg glslScope(mGlslMix);
-		mGlslMix->uniform("iCrossfade", mVDTriangles[triangleMixToRender]->ABCrossfade);
-		// we draw triangle if there is no solo warp which takes the whole area
-		//gl::drawSolidTriangle(mVertices);
-		mVDTriangles[triangleMixToRender]->draw();
-		// save to a texture
-		mTriangleFbos[triangleMixToRender].texture = mTriangleFbos[triangleMixToRender].fbo->getColorTexture();
-		triangleMixToRender++;
-		if (triangleMixToRender >= mVDTriangles.size()) {
-			triangleMixToRender = 0;
-		}
-		if (mSolo > -1) {
-			triangleMixToRender = mSolo;
-			CI_LOG_V(" solo " + toString(mSolo));
-		}
-	}
-	void VDMix::setCurrentEditIndex(unsigned int aIndex) {
-		mCurrentEditIndex = aIndex;
-	}
-	unsigned int VDMix::getSoloOrActiveIndex() {
-		unsigned int rtn = 0;
-		if (mSolo > -1) {
-			rtn = mSolo;
-		}
-		else {
-			if (mUseTriangles) {
-				if (mCurrentEditIndex > mVDTriangles.size() - 1) mCurrentEditIndex = 0;
-			}
-			else {
-				if (mCurrentEditIndex > mWarps.size() - 1) mCurrentEditIndex = 0;
-			}
-			rtn = mCurrentEditIndex;
-		}
-		return rtn;
-	}
-	ci::gl::TextureRef VDMix::getTriangleTexture(unsigned int aTriangleFboIndex) {
-		if (aTriangleFboIndex > mTriangleFbos.size() - 1) aTriangleFboIndex = 0;
-		if (!mTriangleFbos[aTriangleFboIndex].texture) {
-			// should never happen 
-			mTriangleFbos[aTriangleFboIndex].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-		}
-		if (!mTriangleFbos[aTriangleFboIndex].fbo) {
-			// should never happen
-			mTriangleFbos[aTriangleFboIndex].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
-		}
-		// texturing sharing
-		if (mSharedOutputActive && mSharedFboIndex == aTriangleFboIndex) {
-#if defined( CINDER_MSW )
-			// spout
-			if (mSpoutInitialized) {
-				mSpoutSender.SendTexture(mTriangleFbos[mSharedFboIndex].texture->getId(), mTriangleFbos[mSharedFboIndex].texture->getTarget(), mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-			}
-#endif
-#if defined( CINDER_MAC )
-			// syphon
-			mSyphonServer.publishTexture(mTriangleFbos[mSharedFboIndex].texture);
-#endif
-		}
-		return mTriangleFbos[aTriangleFboIndex].texture;
-	}
-	void VDMix::updateTriangleName(unsigned int aTriangleIndex) {
-		if (aTriangleIndex < mVDTriangles.size()) {
-			mVDTriangles[aTriangleIndex]->setName(toString(mVDTriangles[aTriangleIndex]->getMixFboIndex()) + mFboList[mVDTriangles[aTriangleIndex]->getAFboIndex()]->getName().substr(0, 5) + "/" + mFboList[mVDTriangles[aTriangleIndex]->getBFboIndex()]->getName().substr(0, 5));
-		}
-	}
-	void VDMix::setTriangleAFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex) {
-		if (aTriangleIndex < mVDTriangles.size() && aTriangleFboIndex < mFboList.size()) {
-			mVDTriangles[aTriangleIndex]->setAFboIndex(aTriangleFboIndex);
-			updateTriangleName(aTriangleIndex);
-		}
-	}
-	void VDMix::setTriangleBFboIndex(unsigned int aTriangleIndex, unsigned int aTriangleFboIndex) {
-		if (aTriangleIndex < mVDTriangles.size() && aTriangleFboIndex < mFboList.size()) {
-			mVDTriangles[aTriangleIndex]->setBFboIndex(aTriangleFboIndex);
-			updateTriangleName(aTriangleIndex);
-		}
-	}
-#pragma endregion triangles
-
 #pragma region warps
-	void VDMix::createWarp(string wName, unsigned int aFboIndex, unsigned int aShaderIndex, unsigned int bFboIndex, unsigned int bShaderIndex, float xFade) {
-		int newIndex = mMixFbos.size();
-		// ensure bounds are valid
-		aFboIndex = math<int>::min(aFboIndex, getFboListSize() - 1);
-		bFboIndex = math<int>::min(bFboIndex, getFboListSize() - 1);
-
-		aShaderIndex = math<int>::min(aShaderIndex, getShadersCount() - 1);
-		bShaderIndex = math<int>::min(bShaderIndex, getShadersCount() - 1);
-		mMixFbos[newIndex].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
-		mMixFbos[newIndex].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-		mMixFbos[newIndex].name = wName;
-
-		mWarps.push_back(WarpBilinear::create());// 20170103 was WarpPerspectiveBilinear
-		Warp::handleResize(mWarps);
-		Warp::setSize(mWarps, ivec2(mVDSettings->mFboWidth, mVDSettings->mFboHeight)); // create small new warps 
-		Warp::handleResize(mWarps);
-
-		//int i = mWarps.size() - 1; // must have at least 1 warp!
-		mWarps[newIndex]->ABCrossfade = xFade;
-		mWarps[newIndex]->setAFboIndex(aFboIndex);
-		mWarps[newIndex]->setAShaderIndex(aShaderIndex);
-		mWarps[newIndex]->setAShaderFilename(mShaderList[aShaderIndex]->getName());
-		mWarps[newIndex]->setBFboIndex(bFboIndex);
-		mWarps[newIndex]->setBShaderIndex(bShaderIndex);
-		mWarps[newIndex]->setBShaderFilename(mShaderList[bShaderIndex]->getName());
-		mWarps[newIndex]->setMixFboIndex(newIndex);
-		mWarps[newIndex]->setName(toString(mWarps[newIndex]->getMixFboIndex()) + wName);
-		updateWarpName(newIndex);
-	}
-	void VDMix::setWarpAFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
-		if (aWarpIndex < mWarps.size() && aWarpFboIndex < mFboList.size()) {
-			mWarps[aWarpIndex]->setAFboIndex(aWarpFboIndex);
-			updateWarpName(aWarpIndex);
-		}
-	}
-	void VDMix::setWarpBFboIndex(unsigned int aWarpIndex, unsigned int aWarpFboIndex) {
-		if (aWarpIndex < mWarps.size() && aWarpFboIndex < mFboList.size()) {
-			mWarps[aWarpIndex]->setBFboIndex(aWarpFboIndex);
-			updateWarpName(aWarpIndex);
-		}
-	}
-	unsigned int VDMix::getWarpAShaderIndex(unsigned int aWarpIndex) {
-		if (aWarpIndex > mWarps.size() - 1) aWarpIndex = 0;
-		return mWarps[aWarpIndex]->getAShaderIndex();
-	}
-	unsigned int VDMix::getWarpBShaderIndex(unsigned int aWarpIndex) {
-		if (aWarpIndex > mWarps.size() - 1) aWarpIndex = 0;
-		return mWarps[aWarpIndex]->getBShaderIndex();
-	}
-	void VDMix::setWarpAShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex) {
-		if (aWarpIndex < mWarps.size() && aWarpShaderIndex < mShaderList.size()) {
-			mWarps[aWarpIndex]->setAShaderIndex(aWarpShaderIndex);
-			mWarps[aWarpIndex]->setAShaderFilename(mShaderList[aWarpShaderIndex]->getName());
-			updateWarpName(aWarpShaderIndex);
-		}
-	}
-	void VDMix::setWarpBShaderIndex(unsigned int aWarpIndex, unsigned int aWarpShaderIndex) {
-		if (aWarpIndex < mWarps.size() && aWarpShaderIndex < mShaderList.size()) {
-			mWarps[aWarpIndex]->setBShaderIndex(aWarpShaderIndex);
-			mWarps[aWarpIndex]->setBShaderFilename(mShaderList[aWarpShaderIndex]->getName());
-			updateWarpName(aWarpShaderIndex);
-		}
-	}
-
-	void VDMix::updateWarpName(unsigned int aWarpIndex) {
-		if (aWarpIndex < mWarps.size()) {
-			mWarps[aWarpIndex]->setName(toString(mWarps[aWarpIndex]->getMixFboIndex()) + mFboList[mWarps[aWarpIndex]->getAFboIndex()]->getName().substr(0, 5) + "/" + mFboList[mWarps[aWarpIndex]->getBFboIndex()]->getName().substr(0, 5));
-		}
-	}
 	void VDMix::save()
 	{
-		CI_LOG_V("VDMix save: " + mWarpJson.string() + " " + mTrianglesJson.string());
 
-		// save warp settings
-		Warp::save(mWarps, writeFile(mWarpJson));
-		VDTriangle::save(mVDTriangles, writeFile(mTrianglesJson));
 	}
 	void VDMix::load()
 	{
-		CI_LOG_V("VDMix load: " + mWarpJson.string());
-
-		// load warps
-		if (fs::exists(mWarpJson)) mWarps = Warp::load(loadFile(mWarpJson));
-		// create corresponding mMixFbos
-		unsigned int m = mMixFbos.size();
-		while (mMixFbos.size() < mWarps.size())
-		{
+		CI_LOG_V("VDMix load: ");
 			CI_LOG_V("mMixFbos.size() < mWarps.size(), we create a new mixFbo");
-			mMixFbos[m].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
-			mMixFbos[m].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-			mMixFbos[m].name = "new";
-			m++;
-		}
-		// ensure all indexes are valid
-		for (auto &warp : mWarps) {
-			// create the fbos and shaders
-			warp->setAShaderIndex(createShaderFbo(warp->getAShaderFilename(), 0));
-			warp->setBShaderIndex(createShaderFbo(warp->getBShaderFilename(), 0));
-			// ensure all indexes are valid
-			if (warp->getAFboIndex() > mFboList.size() - 1) warp->setAFboIndex(0);
-			if (warp->getBFboIndex() > mFboList.size() - 1) warp->setBFboIndex(0);
-			if (warp->getAShaderIndex() > mShaderList.size() - 1) warp->setAShaderIndex(0);
-			if (warp->getBShaderIndex() > mShaderList.size() - 1) warp->setBShaderIndex(0);
-			if (warp->getMixFboIndex() > mMixFbos.size() - 1) warp->setMixFboIndex(0);
-		}		// load triangles
-		if (fs::exists(mTrianglesJson)) mVDTriangles = VDTriangle::load(loadFile(mTrianglesJson));
-		// create corresponding mTriangleFbos
-		unsigned int t = mTriangleFbos.size();
-		while (mTriangleFbos.size() < mVDTriangles.size())
-		{
-			CI_LOG_V("mTriangleFbos.size() < mVDTriangles.size(), we create a new mTriangleFbo");
-			mTriangleFbos[t].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
-			mTriangleFbos[t].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
-			mTriangleFbos[t].name = "triangle";
-			t++;
-		}
-		// ensure all indexes are valid
-		for (auto &triangle : mVDTriangles) {
-			// create the fbos and shaders
-			triangle->setAShaderIndex(createShaderFbo(triangle->getAShaderFilename(), 0));
-			triangle->setBShaderIndex(createShaderFbo(triangle->getBShaderFilename(), 0));
-			// ensure all indexes are valid
-			if (triangle->getAFboIndex() > mFboList.size() - 1) triangle->setAFboIndex(0);
-			if (triangle->getBFboIndex() > mFboList.size() - 1) triangle->setBFboIndex(0);
-			if (triangle->getAShaderIndex() > mShaderList.size() - 1) triangle->setAShaderIndex(0);
-			if (triangle->getBShaderIndex() > mShaderList.size() - 1) triangle->setBShaderIndex(0);
-			if (triangle->getMixFboIndex() > mTriangleFbos.size() - 1) triangle->setMixFboIndex(0);
-		}
-
+			mMixFbos[0].fbo = gl::Fbo::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight, fboFmt);
+			mMixFbos[0].texture = gl::Texture2d::create(mVDSettings->mFboWidth, mVDSettings->mFboHeight);
+			mMixFbos[0].name = "new";
 	}
 
 	// Render the scene into the FBO
@@ -405,41 +155,14 @@ namespace VideoDromm {
 		gl::clear(Color::black());
 		// setup the viewport to match the dimensions of the FBO
 		gl::ScopedViewport scpVp(ivec2(0), mRenderFbo->getSize());
-		if (mUseTriangles) {
-			// if solo then only render this solo triangle
-			if (mSolo > -1) {
-				mVDTriangles[mSolo]->draw(getTriangleTexture(mSolo), getTriangleTexture(mSolo)->getBounds());
-			}
-			else {
-				// iterate over the triangles and draw their content
-				int i = 0;
-				for (auto &triangle : mVDTriangles) {
-					triangle->draw(getTriangleTexture(i), getTriangleTexture(i)->getBounds());
-					i++;
-				}
-			}
-		}
-		else {
-			// animate
-			if (mWarpAnimationActive) {
-				mWarpActiveIndex++;
-				if (mWarpActiveIndex > mWarps.size() - 1) mWarpActiveIndex = 0;
-				mSolo = mWarpActiveIndex;
-			}
-			// if solo then only render this solo warp
-			if (mSolo > -1) {
-				mWarps[mSolo]->draw(getMixTexture(mSolo), getMixTexture(mSolo)->getBounds());
-			}
-			else {
+
 				// iterate over the warps and draw their content
-				int i = 0;
+				/*int i = 0;
 				for (auto &warp : mWarps) {
 					//warp->draw(mMixes[0]->getMixTexture(mWarpFboIndex), Area(0, 0, mMixes[0]->getFboTextureWidth(mWarpFboIndex), mMixes[0]->getFboTextureHeight(mWarpFboIndex)));
 					if (warp->isActive()) warp->draw(getMixTexture(i), getMixTexture(i)->getBounds());
 					i++;
-				}
-			}
-		}
+				}*/
 		// feedback
 		if (mFeedbackFrames > 0) {
 			mCurrentFeedbackIndex++;
@@ -495,59 +218,39 @@ namespace VideoDromm {
 		mRenderedTexture = mRenderFbo->getColorTexture();
 		return mRenderedTexture;
 	}
-	void VDMix::toggleWarpAnimationActive() {
-		// reset solo
-		(mWarpAnimationActive) ? mSolo = -1 : mWarpActiveIndex = 0;
-		mWarpAnimationActive = !mWarpAnimationActive;
-	}
-
+	
 #pragma endregion warps
 	void VDMix::renderMix() {
-		gl::ScopedFramebuffer scopedFbo(mMixFbos[warpMixToRender].fbo);
+		gl::ScopedFramebuffer scopedFbo(mMixFbos[0].fbo);
 		gl::clear(Color::black());
 		// render A and B fbos 
-		mFboList[mWarps[warpMixToRender]->getAFboIndex()]->getFboTexture();
+		//CI_LOG_V(" iCrossfade " + toString(mWarps[warpMixToRender]->ABCrossfade) + " getAFboIndex " + toString(mWarps[warpMixToRender]->getAFboIndex()) + " getBFboIndex " + toString(mWarps[warpMixToRender]->getBFboIndex()));
+		/*mFboList[mWarps[warpMixToRender]->getAFboIndex()]->getFboTexture();
 		mFboList[mWarps[warpMixToRender]->getBFboIndex()]->getFboTexture();
 		// texture binding must be before ScopedGlslProg
 		mFboList[mWarps[warpMixToRender]->getAFboIndex()]->getRenderedTexture()->bind(0);
-		mFboList[mWarps[warpMixToRender]->getBFboIndex()]->getRenderedTexture()->bind(1);
+		mFboList[mWarps[warpMixToRender]->getBFboIndex()]->getRenderedTexture()->bind(1);*/
+		mFboList[0]->getFboTexture();
+		mFboList[1]->getFboTexture();
+		// texture binding must be before ScopedGlslProg
+		mFboList[0]->getRenderedTexture()->bind(0);
+		mFboList[1]->getRenderedTexture()->bind(1);
 		gl::ScopedGlslProg glslScope(mGlslMix);
-		mGlslMix->uniform("iCrossfade", mWarps[warpMixToRender]->ABCrossfade);
+		mGlslMix->uniform("iCrossfade", mVDSettings->xFade);
 
-		gl::drawSolidRect(Rectf(0, 0, mMixFbos[mWarps[warpMixToRender]->getMixFboIndex()].fbo->getWidth(), mMixFbos[mWarps[warpMixToRender]->getMixFboIndex()].fbo->getHeight()));
+		gl::drawSolidRect(Rectf(0, 0, mMixFbos[0].fbo->getWidth(), mMixFbos[0].fbo->getHeight()));
 
 		// save to a texture
-		mMixFbos[warpMixToRender].texture = mMixFbos[warpMixToRender].fbo->getColorTexture();
-		warpMixToRender++;
-		if (warpMixToRender >= mWarps.size()) {
-			warpMixToRender = 0;
-		}
-		if (mSolo > -1) {
-			warpMixToRender = mSolo;
-			CI_LOG_V(" solo " + toString(mSolo));
-		}
-	}
-	bool VDMix::isWarpTriangle() {
-		return mUseTriangles;
-	}
-	void VDMix::toggleWarpTriangle() {
-		mUseTriangles = !mUseTriangles;
+		mMixFbos[0].texture = mMixFbos[0].fbo->getColorTexture();
+		
 	}
 
 	string VDMix::getMixFboName(unsigned int aMixFboIndex) {
 		if (aMixFboIndex > mMixFbos.size() - 1) aMixFboIndex = mMixFbos.size() - 1;
-		mMixFbos[aMixFboIndex].name = mFboList[mWarps[aMixFboIndex]->getAFboIndex()]->getShaderName() + "/" + mFboList[mWarps[aMixFboIndex]->getAFboIndex()]->getShaderName();
+		mMixFbos[aMixFboIndex].name = mFboList[0]->getShaderName() + "/" + mFboList[1]->getShaderName();
 		return mMixFbos[aMixFboIndex].name;
 	}
-	string VDMix::getTriangleFboName(unsigned int aTriangleFboIndex) {
-		if (aTriangleFboIndex > mTriangleFbos.size() - 1) aTriangleFboIndex = mTriangleFbos.size() - 1;
-		mTriangleFbos[aTriangleFboIndex].name = mFboList[mVDTriangles[aTriangleFboIndex]->getAFboIndex()]->getShaderName() + "/" + mFboList[mVDTriangles[aTriangleFboIndex]->getAFboIndex()]->getShaderName();
-		return mTriangleFbos[aTriangleFboIndex].name;
-
-	}
 	void VDMix::resize() {
-		// tell the warps our window has been resized, so they properly scale up or down
-		Warp::handleResize(mWarps);
 		mRenderFbo = gl::Fbo::create(mVDSettings->mRenderWidth, mVDSettings->mRenderHeight, fboFmt);
 	}
 	void VDMix::updateAudio() {
@@ -560,10 +263,7 @@ namespace VideoDromm {
 		// check if xFade changed
 		if (mVDSettings->xFadeChanged) {
 			mVDSettings->xFadeChanged = false;
-			for (auto &warp : mWarps) {
-				// create the fbos and shaders
-				warp->ABCrossfade = mVDSettings->xFade;
-			}
+			
 		}
 
 		mGlslMix->uniform("iBlendmode", mVDSettings->iBlendmode);
@@ -581,7 +281,7 @@ namespace VideoDromm {
 		mGlslMix->uniform("iAlpha", mVDAnimation->getFloatUniformValueByIndex(4) * mVDSettings->iAlpha);
 		mGlslMix->uniform("iChromatic", mVDAnimation->getFloatUniformValueByIndex(17));
 		mGlslMix->uniform("iRotationSpeed", mVDAnimation->getFloatUniformValueByIndex(9));
-		mGlslMix->uniform("iCrossfade", mWarps[warpMixToRender]->ABCrossfade);
+		mGlslMix->uniform("iCrossfade", mVDSettings->xFade);
 		mGlslMix->uniform("iPixelate", mVDAnimation->getFloatUniformValueByIndex(15));
 		mGlslMix->uniform("iExposure", mVDAnimation->getFloatUniformValueByIndex(14));
 		mGlslMix->uniform("iToggle", (int)mVDAnimation->getBoolUniformValueByIndex(46));
@@ -603,12 +303,9 @@ namespace VideoDromm {
 		mGlslMix->uniform("iBadTv", mVDAnimation->getFloatUniformValueByName("iBadTv"));
 		mGlslMix->uniform("iFps", mVDAnimation->getFloatUniformValueByIndex(mVDSettings->IFPS));
 		mGlslMix->uniform("iContour", mVDAnimation->getFloatUniformValueByName("iContour"));
-		if (mUseTriangles) {
-			renderTriangles();
-		}
-		else {
-			renderMix();
-		}
+		
+		renderMix();
+		
 
 		// blendmodes preview
 		if (mVDAnimation->renderBlend()) {
@@ -675,89 +372,45 @@ namespace VideoDromm {
 
 	bool VDMix::handleMouseMove(MouseEvent &event)
 	{
-		bool handled = true;
-		// pass this mouse event to the warp editor first
-		if (!Warp::handleMouseMove(mWarps, event)) {
-			// let your application perform its mouseMove handling here
-			handled = false;
-		}
+		bool handled = false;
+		
 		event.setHandled(handled);
 		return event.isHandled();
 	}
 
 	bool VDMix::handleMouseDown(MouseEvent &event)
 	{
-		bool handled = true;
-		// pass this mouse event to the warp editor first
-		if (!Warp::handleMouseDown(mWarps, event)) {
-			// let your application perform its mouseDown handling here
-			handled = false;
-		}
+		bool handled = false;
+		
 		event.setHandled(handled);
 		return event.isHandled();
 	}
 	bool VDMix::handleMouseDrag(MouseEvent &event)
 	{
-		bool handled = true;
-		// pass this mouse event to the warp editor first
-		if (!Warp::handleMouseDrag(mWarps, event)) {
-			// let your application perform its mouseDrag handling here
-			handled = false;
-		}
+		bool handled = false;
+		
 		event.setHandled(handled);
 		return event.isHandled();
 	}
 	bool VDMix::handleMouseUp(MouseEvent &event)
 	{
-		bool handled = true;
-		// pass this mouse event to the warp editor first
-		if (!Warp::handleMouseUp(mWarps, event)) {
-			// let your application perform its mouseUp handling here
-			handled = false;
-		}
+		bool handled = false;
+		
 		event.setHandled(handled);
 		return event.isHandled();
 	}
 
 	bool VDMix::handleKeyDown(KeyEvent &event)
 	{
-		bool handled = true;
-#if defined( CINDER_COCOA )
-		bool isModDown = event.isMetaDown();
-#else // windows
-		bool isModDown = event.isControlDown();
-#endif
-		if (isModDown) {
-			switch (event.getCode()) {
-			case KeyEvent::KEY_s:
-				fileWarpsName = "warps" + toString(getElapsedFrames()) + ".json";
-				Warp::save(mWarps, writeFile(mWarpJson));
-				break;
-			case KeyEvent::KEY_n:
-				createWarp();
-				// TODO? Warp::handleResize(mWarps);
-				break;
-			default:
-				handled = false;
-				break;
-			}
-		}
-		else {
-			// pass this key event to the warp editor first
-			if (!Warp::handleKeyDown(mWarps, event)) {
-				handled = false;
-			}
-		}
+		bool handled = false;
+
 		event.setHandled(handled);
 		return event.isHandled();
 	}
 	bool VDMix::handleKeyUp(KeyEvent &event)
 	{
-		bool handled = true;
-		// pass this key event to the warp editor first
-		if (!Warp::handleKeyUp(mWarps, event)) {
-			handled = false;
-		}
+		bool handled = false;
+		
 		event.setHandled(handled);
 		return event.isHandled();
 	}
@@ -775,6 +428,7 @@ namespace VideoDromm {
 
 		if (mShaderList.size() == 0) {
 			CI_LOG_V("VDSession::init mShaderList");
+			createShaderFboFromString("void main(void){vec2 uv = gl_FragCoord.xy / iResolution.xy;fragColor = vec4(sin(uv.x), sin(uv.y), 0.0, 1.0);}", "tex1");
 			createShaderFboFromString("void main(void){vec2 uv = gl_FragCoord.xy / iResolution.xy;fragColor = texture(iChannel0, uv);}", "tex0");
 			createShaderFboFromString("void main(void){vec2 uv = gl_FragCoord.xy / iResolution.xy;fragColor = texture(iChannel0, uv);}", "tex1");
 		}
@@ -1180,12 +834,7 @@ namespace VideoDromm {
 						{
 							mShaderList[i]->setActive(false);
 						}
-						// set active shaders according to warps
-						for (auto &warp : mWarps) {
-							// mShaderList.size() should be > 0 for this part
-							if (warp->getAShaderIndex() < mShaderList.size() - 1) mShaderList[warp->getAShaderIndex()]->setActive(true);
-							if (warp->getBShaderIndex() < mShaderList.size() - 1) mShaderList[warp->getBShaderIndex()]->setActive(true);
-						}
+						
 						// find inactive shader index
 						for (int i = mShaderList.size() - 1; i > 8; i--)
 						{
