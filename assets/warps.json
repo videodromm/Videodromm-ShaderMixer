@@ -1,0 +1,47 @@
+{
+   "warps" : [
+      {
+         "adaptive" : true,
+         "id" : 1,
+         "linear" : false,
+         "resolution" : 16,
+         "warp" : {
+            "active" : true,
+            "afboindex" : 0,
+            "ashaderfilename" : "tex1",
+            "ashaderindex" : 0,
+            "bfboindex" : 1,
+            "brightness" : 1,
+            "bshaderfilename" : "tex1",
+            "bshaderindex" : 0,
+            "controlpoints" : [
+               {
+                  "controlpoint" : 0,
+                  "x" : 0,
+                  "y" : 0
+               },
+               {
+                  "controlpoint" : 1,
+                  "x" : 0,
+                  "y" : 1
+               },
+               {
+                  "controlpoint" : 2,
+                  "x" : 1,
+                  "y" : 0
+               },
+               {
+                  "controlpoint" : 3,
+                  "x" : 1,
+                  "y" : 1
+               }
+            ],
+            "crossfade" : 1,
+            "height" : 2,
+            "method" : "bilinear",
+            "mixfboindex" : 0,
+            "width" : 2
+         }
+      }
+   ]
+}
